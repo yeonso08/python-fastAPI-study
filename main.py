@@ -38,3 +38,17 @@ def read_item(item_id: int, db: Session = Depends(get_db)):
     if db_item is None:
         raise HTTPException(status_code=404, detail="Item not found")
     return db_item
+
+@app.put("/items/{item_id}", response_model=schemas.ItemResponse)
+def update_item(item_id: int, item: schemas.ItemCreate, db: Session = Depends(get_db)):
+    db_item = db.query(models.Item).filter(models.Item.id == item_id).first()
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    db_item.name = item.name
+    db_item.price = item.price
+    db_item.is_available = item.is_available
+
+    db.commit()
+    db.refresh(db_item)
+    return db_item
