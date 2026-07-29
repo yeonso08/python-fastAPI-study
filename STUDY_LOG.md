@@ -29,8 +29,14 @@
 - [x] `PATCH /items/{item_id}` — `exclude_unset=True` + `setattr`로 보낸 필드만 반영
 - [x] 부분 수정 시 나머지 필드가 유지되는지 테스트로 검증
 
+### Alembic 마이그레이션
+- [x] `alembic init alembic` — 뼈대 생성
+- [x] `env.py`에서 `.env`의 `DATABASE_URL` 재사용 + `target_metadata = Base.metadata` 연결
+- [x] `alembic revision --autogenerate` — 실제 DB로 `create_all`이 놓친 `items.category_id` 컬럼 누락을 발견
+- [x] `alembic upgrade head` — 실제 Postgres DB에 누락된 컬럼 반영
+
 ### 다음 목표
-- [ ] Alembic으로 DB 마이그레이션 관리
+- (추후 정함)
 
 ## 배운 핵심 개념 (요약)
 
@@ -56,6 +62,9 @@
 | `exclude_unset=True` | `model_dump()`에서 클라이언트가 실제로 보낸 필드만 dict로 추출 (기본값으로 채워진 필드 제외) |
 | `setattr(obj, key, value)` | `obj.key = value`를 변수로 된 필드명으로 동적으로 실행 |
 | `BaseModel` | Pydantic 기반 클래스. 상속받아야 타입 힌트가 실제 검증/변환 로직으로 동작함 (안 받으면 그냥 힌트일 뿐) |
+| `create_all`의 한계 | 테이블이 없을 때만 생성, 이미 있는 테이블의 컬럼 추가/변경은 반영 안 함 → 실제로 `items.category_id` 누락 발견 |
+| `alembic revision --autogenerate` | 실제 DB와 `models.py`를 비교해서 차이(diff)를 `upgrade()`/`downgrade()` 코드로 자동 생성 |
+| `alembic upgrade head` | 아직 적용 안 된 migration들을 실제 DB에 순서대로 적용 |
 
 ## 참고
 - 상세 설명은 벨로그 시리즈 "[FastAPI 스터디 N편] 프론트엔드 개발자가 처음 백엔드를 만들어보다" 참고
