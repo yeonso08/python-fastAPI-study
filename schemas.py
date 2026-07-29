@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 class ItemCreate(BaseModel):
     name: str
@@ -20,3 +21,9 @@ class CategoryResponse(CategoryCreate):
 
     class Config:
         from_attributes = True
+
+class ItemUpdate(BaseModel):
+    name: Optional[str] = None
+    price: Optional[float] = None
+    is_available: Optional[bool] = None
+    category_id: Optional[int] = None

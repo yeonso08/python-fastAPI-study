@@ -53,6 +53,20 @@ def update_item(item_id: int, item: schemas.ItemCreate, db: Session = Depends(ge
     db.refresh(db_item)
     return db_item
 
+@app.patch("/items/{item_id}", response_model=schemas.ItemResponse)
+def partial_update_item(item_id: int, item: schemas.ItemUpdate, db: Session = Depends(get_db)):
+    db_item = db.query(models.Item).filter(models.Item.id == item_id).first()
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    # 클라이언트가 실제로 보낸 필드만 꺼내서, 그 필드만 반영 (나머지는 그대로 둠)
+    for key, value in item.model_dump(exclude_unset=True).items():
+        setattr(db_item, key, value)
+
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+
 @app.delete("/items/{item_id}")
 def delete_item(item_id: int, db: Session = Depends(get_db)):
     db_item = db.query(models.Item).filter(models.Item.id == item_id).first()

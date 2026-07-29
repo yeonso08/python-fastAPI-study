@@ -24,9 +24,13 @@
 - [x] `category_id` / `item` fixture로 테스트 간 반복 데이터 준비 제거
 - [x] Category/Item CRUD 전체 케이스 (성공 + 404) 작성 — 14개 테스트 통과
 
+### PATCH(부분 수정) vs PUT(전체 수정)
+- [x] `ItemUpdate` 스키마 — 모든 필드 `Optional[...] = None`
+- [x] `PATCH /items/{item_id}` — `exclude_unset=True` + `setattr`로 보낸 필드만 반영
+- [x] 부분 수정 시 나머지 필드가 유지되는지 테스트로 검증
+
 ### 다음 목표
 - [ ] Alembic으로 DB 마이그레이션 관리
-- [ ] PATCH(부분 수정) vs PUT(전체 수정) 차이 다뤄보기
 
 ## 배운 핵심 개념 (요약)
 
@@ -48,6 +52,10 @@
 | `pytest.fixture` | pytest판 `Depends()` — 함수 인자 이름으로 선언하면 필요한 순서대로 자동 실행되어 값 주입 |
 | 테스트 격리 | 테스트 함수마다 테이블을 새로 만들고 지움 → 테스트끼리 데이터 공유 안 됨 (각자 자기 데이터를 직접 준비해야 함) |
 | f-string | `f"/items/{item_id}"` — `{}` 안 변수를 실제 값으로 치환 (앞에 `f` 없으면 글자 그대로 취급됨) |
+| `Optional[X] = None` | 필드를 선택값으로 만듦. Update 스키마에서 `None`은 실제 값이 아니라 "이 필드는 안 보냈다"는 신호 |
+| `exclude_unset=True` | `model_dump()`에서 클라이언트가 실제로 보낸 필드만 dict로 추출 (기본값으로 채워진 필드 제외) |
+| `setattr(obj, key, value)` | `obj.key = value`를 변수로 된 필드명으로 동적으로 실행 |
+| `BaseModel` | Pydantic 기반 클래스. 상속받아야 타입 힌트가 실제 검증/변환 로직으로 동작함 (안 받으면 그냥 힌트일 뿐) |
 
 ## 참고
 - 상세 설명은 벨로그 시리즈 "[FastAPI 스터디 N편] 프론트엔드 개발자가 처음 백엔드를 만들어보다" 참고

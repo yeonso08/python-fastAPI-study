@@ -86,6 +86,21 @@ def test_item_put(client, item, category_id):
     assert data["is_available"] is False
 
 
+def test_item_patch_partial(client, item):
+    # price만 보냈을 때 name은 그대로 유지되는지 확인 (PATCH의 핵심)
+    response = client.patch(f"/items/{item['id']}", json={"price": 6000})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["price"] == 6000
+    assert data["name"] == item["name"]
+
+
+def test_item_patch_404(client):
+    response = client.patch("/items/9999", json={"price": 6000})
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Item not found"}
+
+
 def test_item_put_404(client, category_id):
     response = client.put("/items/9999", json={
         "name": "Bar",
