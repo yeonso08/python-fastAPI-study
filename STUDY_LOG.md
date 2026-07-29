@@ -14,8 +14,12 @@
 - [x] DB 접속 정보 `.env`로 분리
 - [x] git 저장소 초기화 + 기능 단위 커밋
 
+### 모델 간 관계 (Relationship)
+- [x] `Category` 모델 추가 + `Item.category_id` (ForeignKey)
+- [x] 양방향 `relationship()` + `back_populates` 연결
+- [x] Category용 CRUD 엔드포인트 (`/categories/`)
+
 ### 다음 목표
-- [ ] 모델 간 관계(Relationship) — 예: Item ↔ Category
 - [ ] `pytest` + FastAPI `TestClient`로 자동화 테스트
 - [ ] Alembic으로 DB 마이그레이션 관리
 - [ ] PATCH(부분 수정) vs PUT(전체 수정) 차이 다뤄보기
@@ -32,6 +36,9 @@
 | `response_model` | 반환값을 지정한 스키마 모양대로 걸러서 응답 (정보 노출 방지, 문서화, 검증) |
 | `db.refresh()` | DB 전체가 아니라 **객체 하나**만 DB 최신값으로 다시 읽어옴 (읽기 전용) |
 | 204 vs 200+메시지 | 204는 스펙상 body를 가질 수 없음 — 메시지를 보내려면 200 사용 |
+| `ForeignKey` vs `relationship()` | FK는 DB 레벨 제약(숫자 하나), `relationship()`은 ORM 레벨 편의 기능(진짜 객체로 접근) |
+| `back_populates` | 양쪽 relationship을 서로 짝지어줌 — 한쪽 변경 시 파이썬 메모리 상 반대쪽도 동기화 |
+| `from_attributes = True` | Pydantic이 dict가 아니라 `.속성` 접근 객체(SQLAlchemy ORM 객체)로부터도 값을 채울 수 있게 허용 (응답 스키마에만 필요) |
 
 ## 참고
 - 상세 설명은 벨로그 시리즈 "[FastAPI 스터디 N편] 프론트엔드 개발자가 처음 백엔드를 만들어보다" 참고
