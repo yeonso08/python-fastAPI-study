@@ -36,7 +36,7 @@
 - [x] `alembic upgrade head` — 실제 Postgres DB에 누락된 컬럼 반영
 
 ### 다음 목표
-- (추후 정함)
+- [ ] 인증(Authentication) — 회원가입/로그인, 비밀번호 해싱, JWT 발급, 로그인 필요한 라우트 보호
 
 ## 배운 핵심 개념 (요약)
 
