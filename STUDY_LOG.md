@@ -19,8 +19,12 @@
 - [x] 양방향 `relationship()` + `back_populates` 연결
 - [x] Category용 CRUD 엔드포인트 (`/categories/`)
 
+### 자동화 테스트 (pytest + TestClient)
+- [x] `conftest.py` — SQLite in-memory 테스트 DB + `get_db` 의존성 오버라이드
+- [x] `category_id` / `item` fixture로 테스트 간 반복 데이터 준비 제거
+- [x] Category/Item CRUD 전체 케이스 (성공 + 404) 작성 — 14개 테스트 통과
+
 ### 다음 목표
-- [ ] `pytest` + FastAPI `TestClient`로 자동화 테스트
 - [ ] Alembic으로 DB 마이그레이션 관리
 - [ ] PATCH(부분 수정) vs PUT(전체 수정) 차이 다뤄보기
 
@@ -39,6 +43,11 @@
 | `ForeignKey` vs `relationship()` | FK는 DB 레벨 제약(숫자 하나), `relationship()`은 ORM 레벨 편의 기능(진짜 객체로 접근) |
 | `back_populates` | 양쪽 relationship을 서로 짝지어줌 — 한쪽 변경 시 파이썬 메모리 상 반대쪽도 동기화 |
 | `from_attributes = True` | Pydantic이 dict가 아니라 `.속성` 접근 객체(SQLAlchemy ORM 객체)로부터도 값을 채울 수 있게 허용 (응답 스키마에만 필요) |
+| `TestClient` | 실제 서버(포트)를 안 띄우고 `app` 코드를 직접 호출 — 로직은 100% 실제로 실행됨 |
+| `dependency_overrides` | 테스트에서 `get_db`를 실제 DB 대신 테스트용 DB로 바꿔치기 |
+| `pytest.fixture` | pytest판 `Depends()` — 함수 인자 이름으로 선언하면 필요한 순서대로 자동 실행되어 값 주입 |
+| 테스트 격리 | 테스트 함수마다 테이블을 새로 만들고 지움 → 테스트끼리 데이터 공유 안 됨 (각자 자기 데이터를 직접 준비해야 함) |
+| f-string | `f"/items/{item_id}"` — `{}` 안 변수를 실제 값으로 치환 (앞에 `f` 없으면 글자 그대로 취급됨) |
 
 ## 참고
 - 상세 설명은 벨로그 시리즈 "[FastAPI 스터디 N편] 프론트엔드 개발자가 처음 백엔드를 만들어보다" 참고
