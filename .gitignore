@@ -4,3 +4,4 @@ __pycache__/
 .env
 .idea/
 .claude/
+velog_draft_*.md
