@@ -35,8 +35,31 @@
 - [x] `alembic revision --autogenerate` — 실제 DB로 `create_all`이 놓친 `items.category_id` 컬럼 누락을 발견
 - [x] `alembic upgrade head` — 실제 Postgres DB에 누락된 컬럼 반영
 
-### 다음 목표
-- [ ] 인증(Authentication) — 회원가입/로그인, 비밀번호 해싱, JWT 발급, 로그인 필요한 라우트 보호
+### 다음 목표 — 인증(Authentication)
+1단계. User 모델 + 회원가입
+- [ ] `User` 모델 (email unique, hashed_password) + Alembic 마이그레이션
+- [ ] 비밀번호 해싱 유틸 (`auth.py`) — 평문 저장 금지
+- [ ] `UserResponse`에 `hashed_password` 제외 — `response_model`을 정보 유출 방어선으로 사용
+- [ ] `POST /users/` — 이메일 중복 시 400
+
+2단계. 로그인 + JWT 발급
+- [ ] `POST /token` — `OAuth2PasswordRequestForm`으로 로그인 (Swagger의 Authorize 버튼이 이 규격을 씀)
+- [ ] 비밀번호 검증 실패 시 401
+- [ ] `create_access_token()` — `sub`(누구인지) + `exp`(만료) 넣어 서명, `SECRET_KEY`는 `.env`로 분리
+
+3단계. 라우트 보호
+- [ ] `get_current_user` 의존성 — 토큰 디코드 → DB 조회, 없거나 만료면 401
+- [ ] `POST` / `PATCH` / `DELETE /items/`에 적용 (`GET`은 공개로 두고 대비)
+- [ ] `Depends`가 DB 세션뿐 아니라 인증에도 쓰이는 범용 장치임을 확인
+
+4단계. 인증 테스트
+- [ ] 토큰 없음 / 잘못된 토큰 → 401 케이스
+- [ ] `auth_headers` fixture로 정상 토큰 케이스
+- [ ] 인증 추가로 깨진 기존 테스트 14개 복구
+
+### 그 이후 후보
+- [ ] `APIRouter`로 파일 분리 (`routers/items.py`, `routers/users.py`) — `main.py` 비대해짐 해소
+- [ ] 소유권(`Item.owner_id`) — 내가 만든 것만 수정/삭제, 인증(누구냐) vs 인가(권한 있냐)
 
 ## 배운 핵심 개념 (요약)
 
