@@ -55,11 +55,12 @@
 | `from_attributes = True` | Pydantic이 dict가 아니라 `.속성` 접근 객체(SQLAlchemy ORM 객체)로부터도 값을 채울 수 있게 허용 (응답 스키마에만 필요) |
 | `TestClient` | 실제 서버(포트)를 안 띄우고 `app` 코드를 직접 호출 — 로직은 100% 실제로 실행됨 |
 | `dependency_overrides` | 테스트에서 `get_db`를 실제 DB 대신 테스트용 DB로 바꿔치기 |
+| `StaticPool` | SQLite in-memory는 커넥션마다 별도 DB가 생김 → 커넥션을 하나로 고정해야 테이블이 유지됨 (없으면 `no such table: items`) |
 | `pytest.fixture` | pytest판 `Depends()` — 함수 인자 이름으로 선언하면 필요한 순서대로 자동 실행되어 값 주입 |
 | 테스트 격리 | 테스트 함수마다 테이블을 새로 만들고 지움 → 테스트끼리 데이터 공유 안 됨 (각자 자기 데이터를 직접 준비해야 함) |
 | f-string | `f"/items/{item_id}"` — `{}` 안 변수를 실제 값으로 치환 (앞에 `f` 없으면 글자 그대로 취급됨) |
 | `Optional[X] = None` | 필드를 선택값으로 만듦. Update 스키마에서 `None`은 실제 값이 아니라 "이 필드는 안 보냈다"는 신호 |
-| `exclude_unset=True` | `model_dump()`에서 클라이언트가 실제로 보낸 필드만 dict로 추출 (기본값으로 채워진 필드 제외) |
+| `exclude_unset=True` | 없으면 `price`만 보내도 나머지 필드가 `None`으로 덮어써짐 → 클라이언트가 실제로 보낸 필드만 dict로 추출해야 부분 수정이 됨 |
 | `setattr(obj, key, value)` | `obj.key = value`를 변수로 된 필드명으로 동적으로 실행 |
 | `BaseModel` | Pydantic 기반 클래스. 상속받아야 타입 힌트가 실제 검증/변환 로직으로 동작함 (안 받으면 그냥 힌트일 뿐) |
 | `create_all`의 한계 | 테이블이 없을 때만 생성, 이미 있는 테이블의 컬럼 추가/변경은 반영 안 함 → 실제로 `items.category_id` 누락 발견 |
@@ -70,3 +71,4 @@
 - 상세 설명은 벨로그 시리즈 "[FastAPI 스터디 N편] 프론트엔드 개발자가 처음 백엔드를 만들어보다" 참고
   - [1편 — 환경설정 ~ DB 연동](https://velog.io/@hjng0825/FastAPI-스터디-1편-프론트엔드-개발자가-처음-백엔드를-만들어보다-환경설정-DB-연동)
   - [2편 — CRUD 완성 편](https://velog.io/@hjng0825/FastAPI-스터디-2편-프론트엔드-개발자가-처음-백엔드를-만들어보다-CRUD-완성-편)
+  - [3편 — 관계, 테스트, PATCH, 마이그레이션 편](https://velog.io/@hjng0825/FastAPI-스터디-3편-프론트엔드-개발자가-처음-백엔드를-만들어보다-관계-테스트-PATCH-마이그레이션-편)
