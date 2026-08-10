@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from database import engine, SessionLocal, Base
+from database import engine, Base, get_db
 import models
 import schemas
 import auth
@@ -11,17 +12,13 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-# 요청마다 DB 세션을 열고, 끝나면 닫아주는 함수
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 
 @app.post("/items/", response_model=schemas.ItemResponse)
-def create_item(item: schemas.ItemCreate, db: Session = Depends(get_db)):
+def create_item(
+    item: schemas.ItemCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
     db_item = models.Item(**item.model_dump())
     db.add(db_item)
     db.commit()
@@ -55,7 +52,12 @@ def update_item(item_id: int, item: schemas.ItemCreate, db: Session = Depends(ge
     return db_item
 
 @app.patch("/items/{item_id}", response_model=schemas.ItemResponse)
-def partial_update_item(item_id: int, item: schemas.ItemUpdate, db: Session = Depends(get_db)):
+def partial_update_item(
+    item_id: int,
+    item: schemas.ItemUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
     db_item = db.query(models.Item).filter(models.Item.id == item_id).first()
     if db_item is None:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -69,7 +71,11 @@ def partial_update_item(item_id: int, item: schemas.ItemUpdate, db: Session = De
     return db_item
 
 @app.delete("/items/{item_id}")
-def delete_item(item_id: int, db: Session = Depends(get_db)):
+def delete_item(
+    item_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
     db_item = db.query(models.Item).filter(models.Item.id == item_id).first()
     if db_item is None:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -121,3 +127,12 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_user)
     return db_user
+
+@app.post("/token")
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.email == form_data.username).first()
+    if user is None or not auth.verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Incorrect email or password")
+
+    access_token = auth.create_access_token(data={"sub": user.email})
+    return {"access_token": access_token, "token_type": "bearer"}

@@ -43,14 +43,14 @@
 - [x] `POST /users/` — 이메일 중복 시 400
 
 2단계. 로그인 + JWT 발급
-- [ ] `POST /token` — `OAuth2PasswordRequestForm`으로 로그인 (Swagger의 Authorize 버튼이 이 규격을 씀)
-- [ ] 비밀번호 검증 실패 시 401
-- [ ] `create_access_token()` — `sub`(누구인지) + `exp`(만료) 넣어 서명, `SECRET_KEY`는 `.env`로 분리
+- [x] `POST /token` — `OAuth2PasswordRequestForm`으로 로그인 (Swagger의 Authorize 버튼이 이 규격을 씀)
+- [x] 비밀번호 검증 실패 시 401
+- [x] `create_access_token()` — `sub`(누구인지) + `exp`(만료) 넣어 서명, `SECRET_KEY`는 `.env`로 분리
 
 3단계. 라우트 보호
-- [ ] `get_current_user` 의존성 — 토큰 디코드 → DB 조회, 없거나 만료면 401
-- [ ] `POST` / `PATCH` / `DELETE /items/`에 적용 (`GET`은 공개로 두고 대비)
-- [ ] `Depends`가 DB 세션뿐 아니라 인증에도 쓰이는 범용 장치임을 확인
+- [x] `get_current_user` 의존성 — 토큰 디코드 → DB 조회, 없거나 만료면 401
+- [x] `POST` / `PATCH` / `DELETE /items/`에 적용 (`GET`은 공개로 두고 대비)
+- [x] `Depends`가 DB 세션뿐 아니라 인증에도 쓰이는 범용 장치임을 확인
 
 4단계. 인증 테스트
 - [ ] 토큰 없음 / 잘못된 토큰 → 401 케이스
@@ -89,6 +89,14 @@
 | `create_all`의 한계 | 테이블이 없을 때만 생성, 이미 있는 테이블의 컬럼 추가/변경은 반영 안 함 → 실제로 `items.category_id` 누락 발견 |
 | `alembic revision --autogenerate` | 실제 DB와 `models.py`를 비교해서 차이(diff)를 `upgrade()`/`downgrade()` 코드로 자동 생성 |
 | `alembic upgrade head` | 아직 적용 안 된 migration들을 실제 DB에 순서대로 적용 |
+| 비밀번호 해싱 (단방향) | 해시는 원래 값으로 되돌릴 수 없음 → 로그인 검증도 "입력값을 다시 해싱해서 저장된 해시와 비교"하는 방식 |
+| `bcrypt.gensalt()` | 매번 랜덤 salt를 넣어 같은 비밀번호라도 해시 결과가 매번 다르게 나오도록 함 (사전 공격 방어) |
+| `UserResponse`가 `UserCreate`를 상속하면 안 되는 이유 | `UserCreate.password`가 그대로 딸려와 응답에 노출될 뻔함 → 응답 스키마는 독립적으로 선언 |
+| JWT (`sub`/`exp`) | 서버가 `SECRET_KEY`로 서명한 토큰. `sub`(누구)+`exp`(만료)를 담아 클라이언트가 들고 다님, 서버는 서명 검증만으로 DB 조회 없이 신원 확인 가능(stateless) |
+| `OAuth2PasswordRequestForm` | JSON이 아니라 `username`/`password` form 필드로 로그인 받는 FastAPI 내장 의존성. Swagger Authorize 버튼과 호환되는 OAuth2 표준 스펙 |
+| `OAuth2PasswordBearer` | 요청 헤더 `Authorization: Bearer <token>`에서 토큰 문자열만 뽑아주는 의존성. Swagger에 Authorize 버튼이 뜨려면 이게 어딘가 `Depends`로 걸려있어야 함 |
+| `get_current_user` 패턴 | 토큰 디코드 → `sub` 꺼내기 → DB 조회 → 실패 시 401 을 한 함수로 캡슐화, 보호할 엔드포인트마다 `Depends(get_current_user)`만 추가 |
+| `Depends`의 이중 역할 | DB 세션 주입뿐 아니라, 조건 안 맞으면 예외를 던져 요청 자체를 막는 "게이트"로도 쓰임 |
 
 ## 참고
 - 상세 설명은 벨로그 시리즈 "[FastAPI 스터디 N편] 프론트엔드 개발자가 처음 백엔드를 만들어보다" 참고
