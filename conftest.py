@@ -21,6 +21,7 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 
 def override_get_db():
     db = TestingSessionLocal()
+
     try:
         yield db
     finally:

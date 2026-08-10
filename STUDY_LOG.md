@@ -37,10 +37,10 @@
 
 ### 다음 목표 — 인증(Authentication)
 1단계. User 모델 + 회원가입
-- [ ] `User` 모델 (email unique, hashed_password) + Alembic 마이그레이션
-- [ ] 비밀번호 해싱 유틸 (`auth.py`) — 평문 저장 금지
-- [ ] `UserResponse`에 `hashed_password` 제외 — `response_model`을 정보 유출 방어선으로 사용
-- [ ] `POST /users/` — 이메일 중복 시 400
+- [x] `User` 모델 (email unique, hashed_password) + Alembic 마이그레이션
+- [x] 비밀번호 해싱 유틸 (`auth.py`) — 평문 저장 금지
+- [x] `UserResponse`에 `hashed_password` 제외 — `response_model`을 정보 유출 방어선으로 사용
+- [x] `POST /users/` — 이메일 중복 시 400
 
 2단계. 로그인 + JWT 발급
 - [ ] `POST /token` — `OAuth2PasswordRequestForm`으로 로그인 (Swagger의 Authorize 버튼이 이 규격을 씀)

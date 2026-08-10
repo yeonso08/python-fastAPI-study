@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from database import engine, SessionLocal, Base
 import models
 import schemas
+import auth
 
 # 서버 시작할 때 테이블이 없으면 자동으로 생성
 Base.metadata.create_all(bind=engine)
@@ -108,3 +109,15 @@ def delete_category(category_id: int, db: Session = Depends(get_db)):
     db.delete(db_category)
     db.commit()
     return {"message": "Category deleted"}
+
+@app.post("/users/", response_model=schemas.UserResponse)
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    existing_user = db.query(models.User).filter(models.User.email == user.email).first()
+    if existing_user is not None:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    db_user = models.User(email=user.email, hashed_password=auth.hash_password(user.password))
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
